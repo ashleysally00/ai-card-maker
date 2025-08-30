@@ -71,9 +71,9 @@ let isTextFadingIn = false;
 let isColorTransitioning = false;
 let isPaused = false;
 let lastChangeTime = 0;
-const transitionDuration = 1000; // 1 second for text fade (0.5s out, 0.5s in)
-const colorTransitionDuration = 2000; // 2 seconds for color fade
-const messageCycleTime = 5000; // 5 seconds for message switch
+const textTransitionDuration = 600; // 0.6 seconds for text fade (0.3s out, 0.3s in)
+const colorTransitionDuration = 1000; // 1 second for color fade
+const messageCycleTime = 3000; // 3 seconds for message/color switch
 
 function setup() {
   let canvas = createCanvas(600, 400);
@@ -106,7 +106,7 @@ function draw() {
 
   // Smooth text fade-out/in
   if (isTextFadingOut) {
-    let t = (millis() - lastChangeTime) / (transitionDuration / 2);
+    let t = (millis() - lastChangeTime) / (textTransitionDuration / 2);
     if (t >= 1) {
       isTextFadingOut = false;
       isTextFadingIn = true;
@@ -115,7 +115,7 @@ function draw() {
     }
     textOpacity = lerp(255, 0, t);
   } else if (isTextFadingIn) {
-    let t = (millis() - lastChangeTime) / (transitionDuration / 2);
+    let t = (millis() - lastChangeTime) / (textTransitionDuration / 2);
     if (t >= 1) {
       isTextFadingIn = false;
       textOpacity = 255;
@@ -127,15 +127,17 @@ function draw() {
   fill(255, 255, 255, textOpacity);
   text(currentMessage, width / 2, height / 2);
 
-  // Auto-change message every 5 seconds
+  // Auto-change message and color every 3 seconds
   if (!isTextFadingOut && !isTextFadingIn && millis() - lastChangeTime > messageCycleTime) {
     changeMessage();
   }
 }
 
 function changeMessage() {
-  nextMessage = random(messages); // Mock;void Mock AI suggestion
+  nextMessage = random(messages); // Mock AI suggestion
   isTextFadingOut = true;
+  targetColor = color(random(colors)); // Sync color change
+  isColorTransitioning = true;
   lastChangeTime = millis();
   document.getElementById('feedback').innerText = '';
 }
@@ -161,6 +163,8 @@ function submitCustomMessage() {
     messages.push(input.trim()); // Add to rotation
     nextMessage = input.trim(); // Show immediately
     isTextFadingOut = true;
+    targetColor = color(random(colors)); // Sync color change
+    isColorTransitioning = true;
     lastChangeTime = millis();
     document.getElementById('feedback').innerText = 'Message added!';
     document.getElementById('customMessage').value = ''; // Clear input
