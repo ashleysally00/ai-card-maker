@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Card Maker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+      font-family: 'Amatic SC', cursive;
+    }
+    canvas {
+      border: 2px solid #333;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      font-family: 'Amatic SC', cursive;
+      background: #4ECDC4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #6BE6DE;
+    }
+    input[type="text"] {
+      margin: 10px;
+      padding: 10px;
+      font-size: 18px;
+      font-family: 'Amatic SC', cursive;
+      border: 2px solid #333;
+      border-radius: 5px;
+      width: 200px;
+    }
+    #feedback {
+      margin: 10px;
+      font-size: 16px;
+      color: #333;
+      transition: opacity 0.5s;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-holder"></div>
+  <button onclick="changeMessage()">New Message</button>
+  <button onclick="changeColor()">Change Color</button>
+  <button onclick="togglePause()">Pause/Unpause</button>
+  <input type="text" id="customMessage" placeholder="Your empowering message">
+  <button onclick="submitCustomMessage()">Submit Custom Message</button>
+  <div id="feedback"></div>
+<script>
+let messages = ["Empower Your Future!", "Stay Strong!", "Create & Conquer!", "You Got This!"];
+let colors = ['#A3E4D7', '#FADBD8', '#D5DBDB', '#AED6F1']; // Soft pastels, epilepsy-safe
+let currentMessage = messages[0];
+let nextMessage = '';
+let currentColor, targetColor;
+let textOpacity = 255;
+let isTextFadingOut = false;
+let isTextFadingIn = false;
+let isColorTransitioning = false;
+let isPaused = false;
+let lastChangeTime = 0;
+const transitionDuration = 1000; // 1 second for text fade (0.5s out, 0.5s in)
+const colorTransitionDuration = 2000; // 2 seconds for color fade
+const messageCycleTime = 5000; // 5 seconds for message switch
+
+function setup() {
+  let canvas = createCanvas(600, 400);
+  canvas.parent('canvas-holder');
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  textFont('Amatic SC');
+  currentColor = color(colors[0]);
+  targetColor = currentColor;
+}
+
+function draw() {
+  if (isPaused) {
+    background(currentColor);
+    fill(255, 255, 255, textOpacity);
+    text(currentMessage, width / 2, height / 2);
+    return;
+  }
+
+  // Smooth color transition
+  if (isColorTransitioning) {
+    let t = (millis() - lastChangeTime) / colorTransitionDuration;
+    if (t >= 1) {
+      t = 1;
+      isColorTransitioning = false;
+      currentColor = targetColor;
+    }
+    currentColor = lerpColor(currentColor, targetColor, t);
+  }
+
+  // Smooth text fade-out/in
+  if (isTextFadingOut) {
+    let t = (millis() - lastChangeTime) / (transitionDuration / 2);
+    if (t >= 1) {
+      isTextFadingOut = false;
+      isTextFadingIn = true;
+      currentMessage = nextMessage;
+      lastChangeTime = millis();
+    }
+    textOpacity = lerp(255, 0, t);
+  } else if (isTextFadingIn) {
+    let t = (millis() - lastChangeTime) / (transitionDuration / 2);
+    if (t >= 1) {
+      isTextFadingIn = false;
+      textOpacity = 255;
+    }
+    textOpacity = lerp(0, 255, t);
+  }
+
+  background(currentColor);
+  fill(255, 255, 255, textOpacity);
+  text(currentMessage, width / 2, height / 2);
+
+  // Auto-change message every 5 seconds
+  if (!isTextFadingOut && !isTextFadingIn && millis() - lastChangeTime > messageCycleTime) {
+    changeMessage();
+  }
+}
+
+function changeMessage() {
+  nextMessage = random(messages); // Mock;void Mock AI suggestion
+  isTextFadingOut = true;
+  lastChangeTime = millis();
+  document.getElementById('feedback').innerText = '';
+}
+
+function changeColor() {
+  targetColor = color(random(colors));
+  isColorTransitioning = true;
+  lastChangeTime = millis();
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  textOpacity = 255; // Reset opacity when pausing
+  isTextFadingOut = false;
+  isTextFadingIn = false;
+  document.getElementById('feedback').innerText = isPaused ? 'Paused' : '';
+}
+
+function submitCustomMessage() {
+  let input = document.getElementById('customMessage').value;
+  console.log('Input received:', input); // Debug log
+  if (input.trim() !== '') {
+    messages.push(input.trim()); // Add to rotation
+    nextMessage = input.trim(); // Show immediately
+    isTextFadingOut = true;
+    lastChangeTime = millis();
+    document.getElementById('feedback').innerText = 'Message added!';
+    document.getElementById('customMessage').value = ''; // Clear input
+    setTimeout(() => {
+      document.getElementById('feedback').innerText = ''; // Clear feedback
+    }, 2000);
+  } else {
+    document.getElementById('feedback').innerText = 'Please enter a message!';
+    setTimeout(() => {
+      document.getElementById('feedback').innerText = ''; // Clear error
+    }, 2000);
+  }
+}
+</script>
+</body>
+</html>
