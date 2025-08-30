@@ -14,9 +14,6 @@ This is an interactive AI-powered card creator with empowering messages designed
 
 ## How to Run
 
-**Online**
-Visit [ai-card-maker.pages.dev](https://ai-card-maker.pages.dev) (hosted on Cloudflare Pages).
-
 **Locally**
 1. Open `ai-card-maker.html` in a browser.
 2. Alternatively, run `python3 -m http.server 8000` and access `localhost:8000/ai-card-maker.html`.
